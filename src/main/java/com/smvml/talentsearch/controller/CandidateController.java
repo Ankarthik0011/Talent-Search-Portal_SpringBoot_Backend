@@ -6,10 +6,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpHeaders;
 
 @RestController
 @RequestMapping("/api/candidates")
-@CrossOrigin("*")
+@CrossOrigin(origins = "http://localhost:5173")
 public class CandidateController {
 
     @Autowired
@@ -49,4 +54,125 @@ public class CandidateController {
     public long getCount(){
         return service.getCandidateCount();
     }
+    @GetMapping("/filter")
+    public List<Candidate> filterCandidates(
+
+            @RequestParam(required = false) String skill,
+
+            @RequestParam(required = false) String location,
+
+            @RequestParam(required = false) Integer exp) {
+
+        return service.filterCandidates(
+                skill,
+                location,
+                exp);
+    }
+    @PutMapping("/{id}")
+    public Candidate updateCandidate(
+            @PathVariable Long id,
+            @RequestBody Candidate candidate) {
+
+        candidate.setId(id);
+
+        return service.saveCandidate(candidate);
+    }
+
+    @DeleteMapping("/{id}")
+    public String deleteCandidate(
+            @PathVariable Long id) {
+
+        service.deleteCandidate(id);
+
+        return "Candidate Deleted";
+    }
+    @GetMapping("/{id}")
+    public Candidate getCandidateById(
+            @PathVariable Long id) {
+
+        return service.getCandidateById(id);
+    }
+    @GetMapping("/report/total")
+    public long totalCandidates() {
+        return service.getCandidateCount();
+    }
+
+    @GetMapping("/report/average-salary")
+    public double averageSalary() {
+        return service.getAverageSalary();
+    }
+    @GetMapping("/report/highest-salary")
+    public Double highestSalary() {
+        return service.getHighestSalary();
+    }
+
+    @GetMapping("/report/lowest-salary")
+    public Double lowestSalary() {
+        return service.getLowestSalary();
+    }
+
+    @GetMapping("/report/location-count")
+    public long locationCount() {
+        return service.getLocationCount();
+    }
+    @GetMapping("/report/skills")
+    public Map<String, Long> skillsReport() {
+        return service.getSkillDistribution();
+    }
+    @PostMapping("/upload/{id}")
+    public Candidate uploadResume(
+            @PathVariable Long id,
+            @RequestParam("file") MultipartFile file)
+            throws Exception {
+
+        Candidate candidate =
+                service.getCandidateById(id);
+
+        candidate.setResumeFileName(
+                file.getOriginalFilename());
+
+        candidate.setResumeData(
+                file.getBytes());
+
+        return service.saveCandidate(candidate);
+    }
+    @GetMapping("/download/{id}")
+    public ResponseEntity<byte[]> downloadResume(
+            @PathVariable Long id) {
+
+        Candidate candidate =
+                service.getCandidateById(id);
+
+        return ResponseEntity.ok()
+                .header(
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename="
+                                + candidate.getResumeFileName()
+                )
+                .body(candidate.getResumeData());
+    }
+    @GetMapping("/report/locations")
+    public Map<String, Long> locationDistribution() {
+
+        return service.getLocationDistribution();
+    }
+    @GetMapping("/preview/{id}")
+    public ResponseEntity<byte[]> previewResume(
+            @PathVariable Long id) {
+
+        Candidate candidate =
+                service.getCandidateById(id);
+
+        return ResponseEntity.ok()
+                .contentType(
+                        org.springframework.http.MediaType.APPLICATION_PDF
+                )
+                .header(
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        "inline; filename=" +
+                                candidate.getResumeFileName()
+                )
+                .body(candidate.getResumeData());
+    }
+    
 }
