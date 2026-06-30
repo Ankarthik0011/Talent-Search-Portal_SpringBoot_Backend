@@ -77,7 +77,7 @@ public class CandidateService {
                 .min()
                 .orElse(0);
     }
-    
+
 
     public long getLocationCount() {
 
@@ -113,7 +113,7 @@ public class CandidateService {
     public long getCandidateCount(){
         return repository.count();
     }
-    
+
     public void deleteCandidate(Long id) {
         repository.deleteById(id);
     }

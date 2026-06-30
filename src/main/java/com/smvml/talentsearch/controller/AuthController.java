@@ -1,11 +1,13 @@
 package com.smvml.talentsearch.controller;
 
-import com.smvml.talentsearch.dto.LoginRequest;
-import com.smvml.talentsearch.entity.User;
-import com.smvml.talentsearch.repository.UserRepository;
+import com.smvml.talentsearch.dto.*;
+import com.smvml.talentsearch.service.AuthService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -13,24 +15,37 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     @Autowired
-    private UserRepository userRepository;
+    private AuthService authService;
 
     @PostMapping("/login")
-    public User login(
-            @RequestBody LoginRequest request) {
+    public LoginResponse login(@RequestBody LoginRequest request) {
 
-        User user =
-                userRepository.findByUsername(
-                        request.getUsername());
+        System.out.println("LOGIN REQUEST RECEIVED");
+        System.out.println(request.getUsername());
 
-        if (user == null ||
-                !user.getPassword()
-                        .equals(request.getPassword())) {
+        return authService.login(request);
+    }
 
-            throw new RuntimeException(
-                    "Invalid Credentials");
-        }
+    @PostMapping("/register")
+    public RegisterResponse register(@RequestBody RegisterRequest request) {
+        return authService.register(request);
+    }
 
-        return user;
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Map<String, String>> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+        authService.sendOtp(request);
+        return ResponseEntity.ok(Map.of("message", "OTP sent successfully"));
+    }
+
+    @PostMapping("/verify-otp")
+    public ResponseEntity<Map<String, String>> verifyOtp(@RequestBody VerifyOtpRequest request) {
+        authService.verifyOtp(request);
+        return ResponseEntity.ok(Map.of("message", "OTP verified successfully"));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Map<String, String>> resetPassword(@RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request);
+        return ResponseEntity.ok(Map.of("message", "Password reset successfully"));
     }
 }

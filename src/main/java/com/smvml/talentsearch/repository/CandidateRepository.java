@@ -14,4 +14,6 @@ public interface CandidateRepository extends JpaRepository<Candidate, Long> {
     List<Candidate> findByExperienceYearsGreaterThanEqual(Integer experienceYears);
 
     List<Candidate> findByExpectedSalaryLessThanEqual(Double salary);
+
+    Candidate findByEmail(String email);
 }

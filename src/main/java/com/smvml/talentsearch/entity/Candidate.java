@@ -14,6 +14,7 @@ public class Candidate {
 
     private String fullName;
 
+    @Column(unique = true)
     private String email;
 
     private String phone;
